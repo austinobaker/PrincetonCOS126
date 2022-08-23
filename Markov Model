@@ -1,0 +1,159 @@
+/*************************************************************************
+  * Name: Austin O'Baker
+  * NetID: aobaker@princeton.edu
+  * Precept: PO1A
+  *
+  * Description: MarkovModel.java is a data type that implements a Markov model 
+  * of order k from a given text String. It is immutable and uses 
+  * a symbol table for its constructor.
+  *************************************************************************/
+// k is order of Markov model and length of kgram.
+// st is a symbol table.
+public class MarkovModel {
+  private int k;                                       
+  private ST<String, int[]> st;
+  private static final int ASCII = 128;
+  
+// create a Markov model of order k from given text
+// Assume that text has length of at least k.
+  public MarkovModel(String text, int k) {     
+    String text2 = text + text.substring(0, k);
+    this.k = k;                                // define instance variable
+    st = new ST<String, int[]>();
+    for (int i = 0; i < text.length(); i++) {
+      String s = text2.substring(i, i+k);
+      char d = text2.charAt(i+k);
+      if (!st.contains(s))                     
+// if not in st already, declare array for chars
+      {
+        int [] a = new int[ASCII];
+        a[d]++;
+        st.put(s, a);
+      }
+      else                                     
+// if it's already in the symbol table, update
+      {
+        int [] b = st.get(s);
+        b[d]++;
+        st.put(s, b);
+      }
+    } 
+  }
+  
+  public int order() {                        //Returns order k of Markov model
+    return k;
+  }
+  
+  // freq() Returns the number of occurrences 
+  //of kgram in text
+  // Does so by summing the individual occurrences of
+  //each character succeeding it
+  
+  public int freq(String kgram) {
+    if (kgram.length() != k) { // throw an exception if kgram is not of length k
+      throw new RuntimeException("kgram not of length k");
+    }
+    int sum = 0;
+    if (!st.contains(kgram)) { //if there's no such kgram, just output 0
+      return sum;
+    }
+    
+    int [] w = st.get(kgram);  //copy over the array stored in the ST value
+    for (int i = 0; i < ASCII; i++) {
+      sum = sum + w[i];
+    }
+    
+    return sum;
+  }
+  
+  public int freq(String kgram, char c) { 
+// Returns number of times that character c follows kgram
+    if (!st.contains(kgram)) { 
+// Return zero if no such kgram
+      return 0;
+    }
+    if (kgram.length() != k) {            
+// (throw an exception if kgram is not of length k)
+      throw new RuntimeException("kgram not of length k");
+    }
+    int [] z = st.get(kgram);
+    int freq = z[c];
+    return freq;
+  }
+  
+  public char rand(String kgram) {
+    if (kgram.length() != k) {
+      throw new RuntimeException("kgram not of length k"); 
+// (throw exception like above)
+    }
+    if (!st.contains(kgram)) { 
+// throw RuntimeError if there's no such kgram
+      throw new RuntimeException("no such kgram");
+    }
+    double [] p = new double[ASCII];   
+// declare the array to store the probabilities
+    int [] g = st.get(kgram);        
+// extract the array for the kgram and copy it to g
+    
+    for (int i = 0; i < ASCII; i++) { 
+      // iterate across the characters
+      // divide the array corresponding to the kgram 
+      // divide by freq(kgram)
+      p[i] = ((double) g[i]/(double) freq(kgram));
+    }
+    
+    int v = StdRandom.discrete(p);
+    char q = (char) v;
+    return q;
+  }
+  
+// MarkovModel.gen() generates a String of length T characters 
+// by simulating a trajectory through the corresponding 
+// Markov chain.  The first k characters of the newly 
+// generated String should be the argument kgram. 
+// Assume that T is at least k.
+  
+  public String gen(String kgram, int T) { 
+    StringBuilder newstring = new StringBuilder(kgram);
+    for (int i = 0; i < T-k; i++) {
+      //this is the character we want to append
+      char c = rand(newstring.substring(i, i+k)); 
+      //append randomly generated character for each transition (T-k) of them
+      newstring.append(c);                        
+    }
+    //cast StringBuilder to String type
+    return newstring.toString();                  
+  }
+  
+  private void printTable() {
+    for (String key : st) {
+      StdOut.print(key + ": ");
+      int[] entry = st.get(key);
+      for (int i = 0; i < entry.length; i++) {
+        //code for printing entry
+        StdOut.print(entry[i]);
+        //new line before next entry
+      }
+      StdOut.println();
+    }
+  }
+  public static void main(String[] args) {    //Test all methods and constructor.
+    MarkovModel mod1 = new MarkovModel("banana", 2);
+    StdOut.println("freq(\"an\", 'a')    = " + mod1.freq("an", 'a'));
+    StdOut.println("freq(\"na\", 'b')    = " + mod1.freq("na", 'b'));
+    StdOut.println("freq(\"na\", 'a')    = " + mod1.freq("na", 'a'));
+    StdOut.println("freq(\"na\")         = " + mod1.freq("na"));
+    StdOut.println();
+    
+    String text = "one fish two fish red fish blue fish"; 
+    MarkovModel mod2 = new MarkovModel(text, 4);
+    StdOut.println("freq(\"ish \", 'r') = " + mod2.freq("ish ", 'r'));
+    StdOut.println("freq(\"ish \", 0)   = " + mod2.freq("ish ", (char) 0));
+    StdOut.println("freq(\"ish \")      = " + mod2.freq("ish "));
+    StdOut.println("freq(\"tuna\")      = " + mod2.freq("tuna"));
+    
+    MarkovModel mod3 = new MarkovModel("abc", 1);
+    StdOut.println(mod3.gen("a", 5));         //passes all ouput tests
+  }
+  
+}
