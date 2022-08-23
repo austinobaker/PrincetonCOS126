@@ -1,0 +1,21 @@
+/*******************************************************************************
+ *  Name:    Austin O'Baker
+ *  NetID:   aobaker
+ *  Precept: P01A
+ *
+ *  Description:  This program indicates true or false as to whether integers are in an order.
+ ******************************************************************************/
+public class Ordered
+{
+  public static void main(String[] args)
+  {
+    int a = Integer.parseInt(args[0]);
+    int b = Integer.parseInt(args[1]);
+    int c = Integer.parseInt(args[2]);
+    boolean isOrdered;
+    isOrdered = (c > b);
+    isOrdered = isOrdered && (b > a);
+    isOrdered = isOrdered || (c < b) && (b < a);
+    System.out.println(isOrdered);
+  }
+}
