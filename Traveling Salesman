@@ -1,0 +1,180 @@
+/*************************************************************************
+  * Name: Austin O'Baker
+  * NetID: aobaker@princeton.edu
+  * Precept: PO1A
+  *
+  * Description: Given N points in the plane, visit all of them 
+  * while keeping the total distance traveled as short as 
+  * possible by implementing two hueristics:
+  * Nearest neighbor, smallest increase.
+  * 
+  *************************************************************************/
+public class Tour {
+  private Node first;
+  private class Node {
+    private Point p;
+    private Node next;
+    private Node(Point p) {
+      this.p = p;
+      this.next = null;
+    }
+  }
+  public Tour() { // create an empty tour
+    first = null;
+  }
+  public Tour(Point a, Point b, Point c, Point d) { 
+// create a four point tour a => b => c => d
+    // create Nodes for each point input
+    Node aN = new Node(a);
+    Node bN = new Node(b);
+    Node cN = new Node(c);
+    Node dN = new Node(d);
+    
+    //link together in a circle
+    first = aN; //initialize instance variable (Node) first to aN
+    aN.next = bN;
+    bN.next = cN;
+    cN.next = dN;
+    dN.next = aN;
+  }
+  
+  public void show() {
+    // do I need to put in the null case?
+    // makes sense but not sure
+    if (first == null) {
+      StdOut.println("empty Tour");
+    }
+    
+    StdOut.println((first.p).toString());    
+    Node current = first;
+    do {
+      current = current.next;
+      StdOut.println((current.p).toString());
+    } while (current.next != first);
+    
+  }
+  
+  public void draw() {
+    if (first == null) {
+      StdOut.println("empty Tour");
+    }
+    
+    Node current = first;
+    do {
+      current.p.drawTo(current.next.p);
+      current = current.next; 
+    } while (current.next != first);
+    // add this last draw because
+    // the while condition means that when the next
+    // node in the linked list is the first node
+    // it won't draw it. Since we want that
+    // just do it at the end since current
+    // will be updated to the last node.
+    (current.p).drawTo((current.next).p);
+  }
+  public int size() {
+    if (first == null) return 0;
+    
+    Node current = first;
+    int size = 0; //initialize size
+    do { //increment size while we're still 
+      //on the tour until we get back to start
+      size++;
+      current = current.next;
+    } while (current != first);
+    return size;
+  }
+  public double distance() {
+    if (first == null) {
+      return 0;
+    }
+    
+    Node current = first;
+    double d = 0;
+    do {
+      d = d + (current.p).distanceTo((current.next).p);
+      current = current.next;
+    } while (current != first);
+    return d;
+  }
+  
+  public void insertNearest(Point p) {
+    if (first == null) {
+      first = new Node(p);
+      first.next = first;
+    }
+    else {
+      Node current = first; //initialize to first
+      
+      // initialize variable to store nearest node
+      Node nearest = first;
+      do {
+        
+        if (p.distanceTo(current.p) < p.distanceTo(nearest.p)) {
+          // store the node
+          nearest = current;
+        }
+        current = current.next;
+        // traverse while until back to start
+      } while(current != first);
+      // create a new node
+      Node pN = new Node(p);
+      // insert it to after the nearest neighbor
+      pN.next = nearest.next;
+      nearest.next = pN;
+    }
+  }
+  public void insertSmallest(Point p) {
+    double minD = Double.POSITIVE_INFINITY; // distance to minimize
+    if (first == null) {
+      first = new Node(p);
+      first.next = first;
+    }
+    else {
+      Node current = first; //initialize to first
+      // initialize variable to store nearest node
+      Node smallest = first;
+      do {
+        // minimize the distance added to the tour
+        if ((p.distanceTo(current.p) + p.distanceTo(current.next.p) 
+               - current.p.distanceTo(current.next.p)) < minD) {
+          smallest = current;
+          // store the minimum value
+          minD = p.distanceTo(smallest.p) + p.distanceTo(smallest.next.p) 
+            - current.p.distanceTo(smallest.next.p);
+        }
+        current = current.next;
+        // traverse until its back at the start
+      } while(current != first);
+      // create a new node
+      Node pN = new Node(p);
+      // insert it to after the nearest neighbor
+      pN.next = smallest.next;
+      smallest.next = pN;
+    }
+  }
+  public static void main(String[] args) {
+    // define four points forming a square
+    Point a = new Point(100.0, 100.0);
+    Point b = new Point(500.0, 100.0);
+    Point c = new Point(500.0, 500.0);
+    Point d = new Point(100.0, 500.0);
+    
+    // Set up a Tour with those four points
+    // The constructor should link a to b to c to d to a
+    
+    Tour squareTour = new Tour(a, b, c, d);
+    
+    // Output the tour
+    
+    squareTour.show();
+    StdOut.println(squareTour.size());
+    StdOut.println(squareTour.distance());
+    
+    StdDraw.setXscale(0, 600);
+    StdDraw.setYscale(0, 600);
+    
+    squareTour.draw();
+    
+  }
+}
