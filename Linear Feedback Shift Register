@@ -1,0 +1,103 @@
+/*************************************************************************
+  * Name: Austin O'Baker
+  * NetID: aobaker@princeton.edu
+  * Precept: PO1A
+  *
+  * Description: LFSR produces psuedo-random bits by simulating 
+  * a linear feedback shift register
+  * and then using it to implement a simple form of encryption for digital pictures
+  * (according to the instructions).
+  *************************************************************************/
+
+public class LFSR { 
+  
+  // declare instance variables
+  private int N;       // number of bits in the LFSR
+  private int[] reg;   // reg[i] = ith bit of LFSR, reg[0] is rightmost bit
+  private int tap;     // index of the tap bit
+  
+  // constructor to create LFSR with the given initial seed and tap
+  public LFSR(String seed, int t) {
+    
+    //instantiate all instance variables
+    
+    N = seed.length();
+    tap = t;
+    reg = new int [N];
+    for (int i = 0; i < N; i++)
+    {
+      char w = seed.charAt(i);
+      int d = 0;
+      if (w == '0') {
+        d = 0;
+      }
+      else d = 1;
+      reg[N-i-1] = d;
+    }
+
+  }
+  
+  // simulate one step and return the new bit as 0 or 1
+ 
+  public int step() {
+    
+    int k = reg[tap] ^ reg[N-1];
+    for (int i = N-1; i >= 0; i--) {
+      if (i >= 1) {
+        reg[i] = reg[i-1]; 
+      }
+      else 
+      reg[0] = k;
+    }
+    int bit = reg[0];
+    return bit;
+    
+  } 
+  
+  // simulate k steps and return k-bit integer
+
+  public int generate(int k) {
+    
+    int v = 0; //initialize the variable to 0 as per directions
+    //calling the step method k times using loop
+    for (int i = 1; i <= k; i++) { 
+    
+      v = 2*v + step();
+      
+      // as per directions, double the variable each time 
+      // and add the bit from step which is z for me 
+      // the method returns the variable v
+    }
+    return v;
+  } 
+  
+  // return a string representation of the LFSR
+  public String toString()  
+  {
+    //int j = 0;
+    String r = "";
+    for (int i = 0; i < N; i++) 
+    {
+      r = reg[i] + r;
+      //j=i+1;
+      
+    }
+    return r;
+  }   
+
+
+
+// test all of the methods in LFSR
+public static void main(String[] args)  {
+  // Test code here:
+  
+LFSR lfsr = new LFSR("01101000010", 8);
+for (int i = 0; i < 10; i++) {
+    int r = lfsr.generate(5);
+    StdOut.println(lfsr + " " + r);
+}
+
+}
+  
+}
+
