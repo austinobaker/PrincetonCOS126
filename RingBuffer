@@ -1,0 +1,109 @@
+/*************************************************************************
+  * Name: Austin O'Baker
+  * NetID: aobaker@
+  * Precept: PO1A
+  *
+  * This file creates a data type for RingBuffer, a circular buffer.
+  * It uses an array implementation.
+  *****************************************************************************/
+
+public class RingBuffer {
+  private double[] rb;          // items in the buffer
+  private int first;            // index for the next dequeue or peek
+  private int last;             // index for the next enqueue
+  private int size;             // number of items in the buffer
+  
+  
+  // create an empty ring buffer, with given max capacity
+  public RingBuffer(int capacity) {
+    rb = new double[capacity];
+    
+    //intialize instance variables
+    first = 0;
+    last = 0;
+    size = 0;
+    
+  }
+  
+  // return number of items currently in the buffer
+  public int size() {
+    return size;
+  }
+  
+  // Check if the buffer is empty (size equals zero)
+  public boolean isEmpty() {
+    if (size() == 0)
+      return true;
+    else 
+      return false;
+  }
+  
+  // Check if the buffer full (size equals array capacity)
+  public boolean isFull() {
+    //if size is at capacity, then it's full
+    if (size() == rb.length) return true; 
+    else return false;
+  }
+  
+  // add item x to the end
+  public void enqueue(double x) {
+    if (isFull()) {
+      throw new RuntimeException("Ring buffer overflow");
+    }
+    rb[last] = x;
+    
+    //set index to zero if at capacity
+    if (last == rb.length-1)
+      last = 0;
+    else
+      last++;
+    size = size + 1;
+  }
+  
+  // delete and return item from the front
+  public double dequeue() {
+    if (isEmpty()) {
+      throw new RuntimeException("Ring buffer underflow");
+    }
+    double a = rb[first];
+    //set index to zero if at capacity
+    if (first == (rb.length-1)) {
+      first = 0;
+    }
+    else 
+      first++;
+    size--;
+    
+    
+    return a;
+    
+  }
+  
+  // return (but do not delete) item from the front
+  public double peek() {
+    if (isEmpty()) {
+      throw new RuntimeException("Ring buffer underflow");
+    }
+    return rb[first]; 
+  }
+  
+  // a simple test of the constructor and methods in RingBuffer
+  public static void main(String[] args) {
+    int N = Integer.parseInt(args[0]);
+    RingBuffer buffer = new RingBuffer(N);
+    for (int i = 1; i <= N; i++) {
+      buffer.enqueue(i);
+    }
+    System.out.println(buffer.peek());
+    double t = buffer.dequeue();
+    buffer.enqueue(t);
+    System.out.println("Size after wrap-around is " + buffer.size());
+    while (buffer.size() >= 2) {
+      double x = buffer.dequeue();
+      double y = buffer.dequeue();
+      buffer.enqueue(x + y);
+    }
+    System.out.println(buffer.peek());
+  }
+  
+}
