@@ -1,0 +1,147 @@
+/******************************************************************************
+ *  Name:    Austin O'Baker
+ *  NetID:   aobaker
+ *  Precept: P01
+ *
+ *  Description:  Modeling Percolation using an N-by-N grid and Union-Find data 
+ *                structures to determine the threshold.
+ ******************************************************************************/
+
+// constructor
+// intialize to false/closed
+// import the things we need
+import edu.princeton.cs.algs4.StdRandom;
+import edu.princeton.cs.algs4.StdStats;
+import edu.princeton.cs.algs4.QuickFindUF;
+
+public class Percolation {
+    // instance variables
+    private boolean [][] b; // used to keep track of open/blocked status
+    private WeightedQuickUnionUF qfuf; // used to keep track of connectivity
+    private int count; // count of the open sites
+    private int dim; // dimension of the square grid
+    private int top; // top virtual node index for union find
+    private int bottom; // bottom virtual node index for union find
+    
+    /////////////////////////////////////////////////
+    
+    // private methods validate to check bounds and convert to convert 2D to 1D
+    private int convert(int row, int col) {
+        int value = row*(dim) + col;
+        return value;
+    }
+    
+    // private method to validate
+    private boolean validate(int row, int col) {
+        if (row >= 0 && row < dim && col >= 0 && col < dim) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+   ////////////////////////////////////////////////
+    
+    //constructor, intialize to false/closed
+    public Percolation(int n) {
+        if (n <= 0) {throw new java.lang.IllegalArgumentException(); }
+        
+        b = new boolean[n][n];
+        qfuf = new WeightedQuickUnionUF((n*n)+2);
+        count = 0;
+        dim = n;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                b[i][j] = false;
+            }
+        }
+        // ask about these
+        top = qfuf.find(n*n);
+        bottom = qfuf.find(n*n+1);
+        //System.out.println(top);
+    }
+    
+    public void open(int row, int col) {
+        // throw out of bounds exceptions
+        // set the value in the boolean array to true
+        if (row < 0 || col < 0) {throw new java.lang.IndexOutOfBoundsException();}
+        if (row >= dim || col >= dim) {throw new java.lang.IndexOutOfBoundsException();}
+        
+        int convert = convert(row,col);
+        int convertUp = convert(row-1,col);
+        int convertDown = convert(row+1, col);
+        int convertLeft = convert(row, col-1);
+        int convertRight = convert(row, col+1);
+                                
+        // open the site if its closed and connect it to all open neighbors
+        if (b[row][col] == false) {b[row][col] = true; count++;}
+        // if the site is already open then return, do nothing more
+        //if (b[row][col] == true) {}
+        
+        // if there are open neighbors then connect the newly opened site to them
+        if (validate(row-1,col) == true && b[row-1][col] == true) {qfuf.union(convert, convertUp); }
+        if (validate(row+1,col) == true && b[row+1][col] == true) {qfuf.union(convert, convertDown); }
+        if (validate(row,col-1) == true && b[row][col-1] == true) {qfuf.union(convert, convertLeft); }
+        if (validate(row,col+1) == true && b[row][col+1] == true) {qfuf.union(convert, convertRight); }
+        
+        //System.out.println(row);
+        if (row == 0) {qfuf.union(convert,top);}
+        if (row == dim -1) {qfuf.union(convert,bottom);}
+        
+    }
+    
+    public boolean isOpen(int row, int col) {
+        if (row < 0 || col < 0) {throw new java.lang.IndexOutOfBoundsException();}
+        if (row >= dim || col >= dim) {throw new java.lang.IndexOutOfBoundsException();}
+        
+        boolean open = false;
+        if (b[row][col] == true) {open = true;}
+        else if (b[row][col] == false) {open = false;}
+        
+        return open;
+        }
+    
+    public boolean isFull(int row, int col) {
+        //intialize to false
+        boolean full = false;
+        // index check for out of bounds
+        if (row < 0 || col < 0) {throw new java.lang.IndexOutOfBoundsException();}
+        if (row >= dim || col >= dim) {throw new java.lang.IndexOutOfBoundsException();}
+        
+        int convert = convert(row,col);
+        if (qfuf.connected(convert, top) == true) {full = true;}
+        if (qfuf.connected(convert, top) == false) {full = false;}
+        
+        return full;
+        }
+    
+    public int numberOfOpenSites() {
+        return count;
+        }
+    
+    public boolean percolates() {
+        boolean percolates = false;
+        if (qfuf.connected(top,bottom) == true) {percolates = true;}
+        else if (qfuf.connected(top,bottom) == false) {percolates = false;}
+        return percolates;
+        }
+    
+    public static void main (String[] args) {
+        
+        Percolation grid = new Percolation(2);
+        grid.open(0,0);
+        grid.open(1,1);
+        int i = grid.numberOfOpenSites();
+        boolean b4 = grid.isOpen(0,0);
+        boolean b5 = grid.isOpen(1,1);
+        boolean b6 = grid.isFull(0,0);
+        boolean b7 = grid.isFull(1,1);
+        boolean b8 = grid.percolates();
+        
+        System.out.println(b4);
+        System.out.println(b5);
+        System.out.println(b6);
+        System.out.println(b7);
+        System.out.println(b8);
+        }
+    }
