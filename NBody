@@ -1,0 +1,125 @@
+/*******************************************************************************
+ *  Name:    Austin O'Baker
+ *  NetID:   aobaker
+ *  Precept: P01A
+ *
+ *  Description:  Program simulates gravitation and orbit of n number of bodies.
+ ******************************************************************************/
+public class NBody
+{
+  public static void main(String[] args)
+  {
+    double t = Double.parseDouble(args[0]);
+    double deltat = Double.parseDouble(args[1]);
+    double b = Math.pow(10, -11);
+    double g = 6.67 *b;
+    //specify t and delta t as doubles
+    // create a parallel array using Standard Input
+    // create g as the gravitational constant
+    int N = StdIn.readInt();
+    double r = StdIn.readDouble();
+    
+    //declare, initialize
+    
+    double[] posx  = new double[N];
+    double[] posy = new double [N];
+    double[] velx = new double [N];
+    double[] vely = new double [N];
+    double[] mass = new double [N];
+    String[] image = new String [N];
+    
+    //read data from standard input
+    
+    
+    for (int i = 0; i < N; i++) {
+      posx[i] = StdIn.readDouble();                    
+      posy[i] = StdIn.readDouble();  
+      velx[i] = StdIn.readDouble();  
+      vely[i] = StdIn.readDouble();
+      mass[i] = StdIn.readDouble();
+      image[i] = StdIn.readString();
+    }
+    
+    StdDraw.setXscale(-r, r);
+    StdDraw.setYscale(-r, r);
+    
+    //create time loop
+    
+    
+    for (double k = 0; k < t; k = k+deltat) {
+      
+      double [] fx = new double[N];
+      double [] fy = new double[N];
+      
+      for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+          if (i != j) {
+            
+            //physics calculations below
+            
+            double deltax = ((posx[i]) - (posx[j]))*((posx[i]) - (posx[j]));
+            double deltay = ((posy[i]) - (posy[j]))*((posy[i]) - (posy[j]));
+            double r2 = Math.sqrt((deltax + deltay));
+            double w = posx[j]-posx[i];
+            double z = posy[j]-posy[i];
+            double f = g*(mass[i])*(mass[j])*(1/(deltax + deltay));
+            fx[i] = fx[i] + ((f *(w))/r2);
+            fy[i] = fy[i] + ((f*(z))/r2);
+            
+          }  
+        }
+      }
+      
+      //updates position and velocity
+      
+      for (int i = 0; i < N; i++) {
+        double ax = (fx[i])/(mass[i]);
+        double ay = (fy[i])/(mass[i]);
+        
+        velx[i] = velx[i] + (deltat)*ax;
+        vely[i] = vely[i] + (deltat)*ay;
+        posx[i] = posx[i] + (deltat)*velx[i];
+        posy[i] = posy[i] + (deltat)*vely[i];
+        
+      }
+      
+      //draws background and n number of bodies
+      
+      StdDraw.picture(0, 0, "starfield.jpg");
+      
+      for (int i = 0; i < N; i++) {
+        StdDraw.picture(posx[i], posy[i], image[i]);
+        
+      }
+      StdDraw.show(20);
+    }
+    
+    
+    for (int i = 0; i < N; i++) {
+      StdOut.println(posx[i]);
+      StdOut.println(posy[i]);
+      StdOut.println(velx[i]);
+      StdOut.println(vely[i]);
+      StdOut.println(mass[i]);
+      StdOut.println(image[i]);
+      
+    }
+
+  }
+ 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
